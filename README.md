@@ -1,6 +1,6 @@
 # Physiology_GUIs
 
-@author: Paul Savoca
+Author: Paul Savoca
 
 Email: ps365@g.ucla.edu
 
@@ -21,7 +21,8 @@ These files can then be used for ECG-based analyses (e.g., IBI, HRV, ect.)
 
 ### Installation & Running
 1. Download 'nk_ecg_gui.py'
-2. Install necessary dependencies:
+   * Sample Physiology Data (acquired at 2kHz) is also available: NK_ECG_GUI/Sample_Data/Sample_Physio_2kHz.acq
+3. Install necessary dependencies:
   * numpy
   * neurokit2
   * PySimpleGUI
