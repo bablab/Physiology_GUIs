@@ -14,8 +14,19 @@ The GUI allows for manual checking and editting of R-peaks which are initially d
 
 The application generates 2 output files: 
 
-  1) the filtered ECG signal
-    
-  2) the finalized set of R-peaks
+1. the filtered ECG signal
+2. the finalized set of R-peaks
 
 These files can then be used for ECG-based analyses (e.g., IBI, HRV, ect.)
+
+### Installation & Running
+1. Download 'nk_ecg_gui.py'
+2. Install necessary dependencies:
+  * numpy
+  * neurokit2
+  * PySimpleGUI
+  * matplotlib
+  * mpl_point_clicker
+  * os
+  * bioread   
+4. To start application -- From command line: 'python nk_ecg_gui.py'
