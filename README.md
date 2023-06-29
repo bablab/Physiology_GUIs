@@ -8,6 +8,7 @@ Twitter: @pw_savoca
 
 Lab: Brain and Body Lab, UCLA
 
+# Neurokit2 ECG GUI (nk_ecg_gui.py)
 This application is intended for manual editing of ECG data from .Acq files. 
 The GUI allows for manual checking and editting of R-peaks which are initially detected using the Neurokit2 (Makowski et al., 2020).
 
