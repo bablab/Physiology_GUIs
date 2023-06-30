@@ -23,10 +23,5 @@ These files can then be used for ECG-based analyses (e.g., IBI, HRV, ect.)
 1. Download ['nk_ecg_gui.py'](https://github.com/bablab/Physiology_GUIs/blob/main/NK_ECG_GUI/nk_ecg_gui.py)
    * Sample Physiology Data (acquired at 2kHz) is also available: NK_ECG_GUI/Sample_Data/[Sample_Physio_2kHz.acq](https://github.com/bablab/Physiology_GUIs/blob/main/NK_ECG_GUI/Sample_Data/Sample_Physio_2kHz.acq)
 3. Install necessary dependencies:
-  * numpy
-  * neurokit2
-  * PySimpleGUI
-  * matplotlib
-  * mpl_point_clicker
-  * bioread   
+  * 'pip install numpy neurokit2 PySimpleGUI matplotlib mpl_point_clicker bioread'
 4. To start application -- From command line: 'python nk_ecg_gui.py'
