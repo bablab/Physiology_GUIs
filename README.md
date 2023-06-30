@@ -28,6 +28,5 @@ These files can then be used for ECG-based analyses (e.g., IBI, HRV, ect.)
   * PySimpleGUI
   * matplotlib
   * mpl_point_clicker
-  * os
   * bioread   
 4. To start application -- From command line: 'python nk_ecg_gui.py'
