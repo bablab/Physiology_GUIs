@@ -65,7 +65,15 @@ def onpick1(event):
     if edit_mode == 'remove' and thisline == points:
         ax.plot(xval[ind], yval[ind], 'rx')
         draw(figure_canvas_agg, toolbar)
-        delete_peaks.append(int(ind))       
+        delete_peaks.append(int(ind))
+        
+    if edit_mode == 'add_nosnap' and thisline == ecg:
+        max_ind = np.argmax(yval[ind])
+        max_ind = ind[max_ind]
+        local_max = max_ind
+        ax.plot(xval[local_max], yval[local_max], 'yo')
+        draw(figure_canvas_agg, toolbar)
+        add_peaks.append(local_max)
         
 #Snap to Peak Correction
 def findpeak(x, ecg_clean):
@@ -177,7 +185,8 @@ layout = [
     [sg.T('Edit Physio Data')],
     [sg.B('Re-Plot'), sg.B('Save'),sg.B('Exit')],
     [sg.T('Controls:')],
-    [sg.B('Add Peak', button_color = ('white','black')), sg.B('Remove Peak', button_color = ('white','black')),sg.Canvas(key='controls_cv')],
+    [sg.B('Add Peak (Snap)', button_color = ('white','black')), sg.B('Remove Peak', button_color = ('white','black')),
+     sg.B('Add Peak (No-Snap)', button_color = ('white','black')), sg.Canvas(key='controls_cv')],
     [sg.Column(
         layout=[
             [sg.Canvas(key='fig_cv',
@@ -207,16 +216,24 @@ while True:
     if event in (sg.WINDOW_CLOSED, 'Exit'):
         break
     
-    elif event == 'Add Peak':
+    elif event == 'Add Peak (Snap)':
         edit_mode = 'add'
-        window['Add Peak'].update(button_color = ('black','yellow'))
+        window['Add Peak (Snap)'].update(button_color = ('black','yellow'))
         window['Remove Peak'].update(button_color = ('white','black'))
+        window['Add Peak (No-Snap)'].update(button_color = ('white','black'))
         
     
     elif event == 'Remove Peak':
         edit_mode = 'remove'
         window['Remove Peak'].update(button_color = ('black','yellow'))
-        window['Add Peak'].update(button_color = ('white','black'))
+        window['Add Peak (Snap)'].update(button_color = ('white','black'))
+        window['Add Peak (No-Snap)'].update(button_color = ('white','black'))
+        
+    elif event == 'Add Peak (No-Snap)':
+        edit_mode = 'add_nosnap'
+        window['Remove Peak'].update(button_color = ('white','black'))
+        window['Add Peak (Snap)'].update(button_color = ('white','black'))
+        window['Add Peak (No-Snap)'].update(button_color = ('black','yellow'))
        
     
     elif event == 'Re-Plot':
@@ -247,7 +264,8 @@ while True:
         
         #Plot Final Product -- No more ability to edit; gray out buttons
         window['Remove Peak'].update(button_color = ('white','gray'), disabled=True)
-        window['Add Peak'].update(button_color = ('white','gray'), disabled=True)
+        window['Add Peak (Snap)'].update(button_color = ('white','gray'), disabled=True)
+        window['Add Peak (No-Snap)'].update(button_color = ('white','gray'), disabled=True)
         ecg_plot()
         
         #Save Outputs
