@@ -12,6 +12,8 @@ Lab: Brain and Body Lab, UCLA
 This application is intended for manual editing of ECG data from .Acq files. 
 The GUI allows for manual checking and editting of R-peaks which are initially detected using the Neurokit2 (Makowski et al., 2020).
 
+As of May 2024, you can also edit ECG data stored as a time-series in a .Csv file. The data must be stored as a single column with no header. The application will prompt you to manually enter the sampling rate of your data.
+
 The application generates 2 output files: 
 
 1. the filtered ECG signal
