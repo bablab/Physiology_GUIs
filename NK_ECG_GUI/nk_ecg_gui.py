@@ -29,6 +29,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 import PySimpleGUI as sg
 import os
+import re
+import pandas as pd
 
 
 #Create Empty Delete and Add Peak Arrays
@@ -106,8 +108,8 @@ class Toolbar(NavigationToolbar2Tk):
 #Starting Screen
 layout_intro = [[sg.T("")], [sg.Text("Information about ECG Cleaning Application.")],
           [sg.Text("Instructions:")],
-          [sg.Text("1) Select .Acq Physio File")],
-          [sg.Text("2) Select ECG Source Channel and Filtering Parameters")],
+          [sg.Text("1) Select .Acq Physio File or .Csv (single column, no header) Physio Timeseries")],
+          [sg.Text("2) Select ECG Source Channel and/or Parameters")],
           [sg.Text("3) View Filtered Data -- Add or Remove R Peaks")],
           [sg.Text("4) Save Edits -- Outputs Filtered ECG and Index of Correct R Peaks")],
           [sg.Text("Press Continue to Begin.")],
@@ -144,37 +146,84 @@ while True:
         window_file.close()
         break
        
-#Pull Channel names and Sampling Rate
-physio_file, sampling_rate = nk.read_acqknowledge(file_name)
-channels = tuple(physio_file.columns)
-
-##Window to Select Output location & Sampling Rate  
-layout_settings = [[sg.T("")],[sg.Text("Select ECG Source:"), sg.Combo(channels, default_value='',key='-Source-')],
-         [sg.Text("Notch Filter:"),sg.Radio("60Hz", "notch", key='60', default=True),sg.Radio("50Hz", "notch", key='50')],
-         [sg.Button("Plot Signal"), sg.Button("Exit")]]
-
-###Building Window
-window_settings = sg.Window('ECG Cleaning App', layout_settings, size=(600,300))
+#File Prep for ACQ Files
+if re.search(".acq", file_name):
+    #Pull Channel names and Sampling Rate
+    physio_file, sampling_rate = nk.read_acqknowledge(file_name)
+    channels = tuple(physio_file.columns)
     
-while True:
-    event, values = window_settings.read()
-    if event == sg.WIN_CLOSED or event=="Exit":
-        exit()
-        break
-    elif event == "Plot Signal":
-        #output_location = values["-IN2-"]
-        #sampling_rate = int(values["-IN3-"])
-        ecg_source = values["-Source-"]
-        if values['60']==True:
-            notch_filter= 60
-        elif values['50']==True:
-            notch_filter= 50
-        window_settings.close()
-        break
+    ##Window to Select Channel & Notch Filter  
+    layout_settings = [[sg.T("")],[sg.Text("Select ECG Source:"), sg.Combo(channels, default_value='',key='-Source-')],
+             [sg.Text("Notch Filter:"),sg.Radio("60Hz", "notch", key='60', default=True),sg.Radio("50Hz", "notch", key='50')],
+             [sg.Button("Plot Signal"), sg.Button("Exit")]]
+    
+    ###Building Window
+    window_settings = sg.Window('ECG Cleaning App', layout_settings, size=(600,300))
+        
+    while True:
+        event, values = window_settings.read()
+        if event == sg.WIN_CLOSED or event=="Exit":
+            exit()
+            break
+        elif event == "Plot Signal":
+            ecg_source = values["-Source-"]
+            if values['60']==True:
+                notch_filter= 60
+            elif values['50']==True:
+                notch_filter= 50
+            window_settings.close()
+            break
+    
+    
+
+#File Prep for CSV Files
+
+elif re.search(".csv", file_name):
+    physio_file = pd.read_csv(file_name, header=None)
+    
+    ##Window to Select Sampling Rate & Notch Filter  
+    layout_settings = [[sg.T("")],[sg.Text("Set Sampling Rate:"), sg.Input('', enable_events=True, key='-SRINPUT-', font=('Arial Bold', 20), expand_x=True, justification='left')],
+             [sg.Text("Notch Filter:"),sg.Radio("60Hz", "notch", key='60', default=True),sg.Radio("50Hz", "notch", key='50')],
+             [sg.Button("Plot Signal"), sg.Button("Exit")]]
+    
+    ###Building Window
+    window_settings = sg.Window('ECG Cleaning App', layout_settings, size=(600,300))
+        
+    while True:
+        event, values = window_settings.read()
+        if event == sg.WIN_CLOSED or event=="Exit":
+            exit()
+            break
+        elif event == "Plot Signal":
+            sampling_rate = np.float64(values["-SRINPUT-"])
+            ecg_source = 0
+            if values['60']==True:
+                notch_filter= 60
+            elif values['50']==True:
+                notch_filter= 50
+            window_settings.close()
+            break
+
+#If Invlaid File type (not ACQ or CSV)
+else:
+    layout_fileError = [[sg.T("")],
+              [sg.Text("ERROR: Invalid File Type")],
+              [sg.Text("Only acceptable file type: .acq or .csv")],
+              [sg.Button('Exit')]]
+    
+    window_fileError = sg.Window('ECG Cleaning App', layout_fileError, size=(600,400))
+    
+    while True:
+        event, values = window_fileError.read()
+        if event == sg.WIN_CLOSED or event=="Exit":
+            exit()
+            window_fileError.close()
+            break
 
 #ECG Processing
 Raw_ECG = physio_file[ecg_source]
 SR=sampling_rate
+print(type(SR))
 ecg_clean = nk.ecg_clean(Raw_ECG, sampling_rate=SR, method='neurokit', powerline=notch_filter)
 r_peaks = nk.ecg_peaks(ecg_clean, sampling_rate=SR)
 peaks = (np.where(r_peaks[0] == 1)[0])
@@ -271,6 +320,7 @@ while True:
         #Save Outputs
         ppt_name = file_name.rsplit('/',1)[1]
         ppt_name = ppt_name.replace(".acq", "")
+        ppt_name = ppt_name.replace(".csv", "")
         Rs_name = "{}_r_peaks_edited.csv".format(ppt_name)
         ECG_name = "{}_ECG_cleaned.csv".format(ppt_name)
         os.chdir(output_location)
