@@ -46,6 +46,11 @@ def draw_figure_w_toolbar(canvas, fig, canvas_toolbar):
     figure_canvas_agg.get_tk_widget().pack(side='right', fill='both', expand=1)
     return figure_canvas_agg, toolbar
 
+def draw_figure(canvas, fig):
+    figure_canvas_agg = FigureCanvasTkAgg(fig, master=canvas)
+    figure_canvas_agg.get_tk_widget().pack(side='right', fill='both', expand=1)
+    return figure_canvas_agg
+
 def draw(figure_canvas_agg, toolbar):
     figure_canvas_agg.draw()
     #toolbar.update()   
@@ -100,6 +105,28 @@ def ecg_plot():
     points, = ax.plot(peaks/SR, ecg_clean[peaks], "bo", picker=True) 
     draw(figure_canvas_agg, toolbar)
     return ecg, points
+
+def ibi_plot(rpeaks):
+    #Derive HR
+    HR = nk.signal_rate(peaks=rpeaks,
+                           desired_length=(None),
+                           interpolation_method="nearest",
+                           sampling_rate = SR)
+    
+    #Convert to IBI
+    IBI = [60000/i for i in HR]
+        
+    fig2.subplots_adjust(right=.95, left=0.1, bottom=0.25, top=0.9)
+    time_ibi = np.linspace(0, (ecg_clean.shape[0] / SR), len(IBI))
+    ax2.set_title("")
+    ax2.set_xlabel("")
+    #ax2.set_xticklabels([])
+    ax2.set_ylabel("IBI (ms)")
+    #bi, = ax2.plot(time, r_peaks, 'r-')
+    ibi, = ax2.plot(time_ibi, IBI, 'g-')
+    figure_canvas_agg2.draw()
+    #draw(figure_canvas_agg, toolbar)
+    return ibi
 
 class Toolbar(NavigationToolbar2Tk):
     def __init__(self, *args, **kwargs):
@@ -223,7 +250,7 @@ else:
 #ECG Processing
 Raw_ECG = physio_file[ecg_source]
 SR=sampling_rate
-print(type(SR))
+#print(type(SR))
 ecg_clean = nk.ecg_clean(Raw_ECG, sampling_rate=SR, method='neurokit', powerline=notch_filter)
 r_peaks = nk.ecg_peaks(ecg_clean, sampling_rate=SR)
 peaks = (np.where(r_peaks[0] == 1)[0])
@@ -236,27 +263,26 @@ layout = [
     [sg.T('Controls:')],
     [sg.B('Add Peak (Snap)', button_color = ('white','black')), sg.B('Remove Peak', button_color = ('white','black')),
      sg.B('Add Peak (No-Snap)', button_color = ('white','black')), sg.Canvas(key='controls_cv')],
-    [sg.Column(
-        layout=[
-            [sg.Canvas(key='fig_cv',
-                       size=(1500, 750),
-                       expand_x=True,
-                       expand_y=True
-                       )]
-        ],
-        background_color='#DAE0E6',
-        pad=(0, 0)
-    )],
+    [sg.Column(layout=[[sg.Canvas(key='fig_cv',size=(1500, 750),expand_x=True,expand_y=True)]],
+               background_color='#DAE0E6',
+               pad=(0, 0))],
+    [sg.Column(layout=[[sg.Canvas(key='fig_ibi',size=(1500, 750),expand_x=True,expand_y=True)]],
+               background_color='#DAE0E6',
+               pad=(0, 0))]
 ]
 
 window = sg.Window('ECG Editor', layout, finalize=True, resizable = True)
 
-# 3. Create a plot of the ECG Data
+# 3. Create a plot of the ECG Data & IBI Plot Beneath
 fig = Figure(figsize=(20, 10), dpi=125)
+fig2 = Figure(figsize=(20, 5), dpi=125)
 fig.canvas.mpl_connect('pick_event', onpick1)
 ax = fig.add_subplot()
+ax2 = fig2.add_subplot()
 figure_canvas_agg, toolbar = draw_figure_w_toolbar(window['fig_cv'].TKCanvas, fig, window['controls_cv'].TKCanvas)
+figure_canvas_agg2 = draw_figure(window['fig_ibi'].TKCanvas, fig2)
 ecg, points = ecg_plot()
+ibi = ibi_plot(peaks)
 
 # 4. GUI Events
 while True:
@@ -288,10 +314,12 @@ while True:
     elif event == 'Re-Plot':
         #Reset Graph and Edited Points
         ax.cla()
+        ax2.cla()
         add_peaks =[]
         delete_peaks = []
         #New Plot
         ecg, points = ecg_plot()
+        ibi = ibi_plot(peaks)
      
 #Saving Edits & Plot Final Product
     elif event == 'Save':
@@ -300,7 +328,8 @@ while True:
         output_location=sg.popup_get_folder('Select Output Location', title="Output Folder")
 
         #Clear what was previously drawn
-        ax.cla()                  
+        ax.cla()
+        ax2.cla()                  
         
         #Remove Peaks Identified as Errors
         for i in sorted(delete_peaks, reverse=True):
@@ -316,6 +345,7 @@ while True:
         window['Add Peak (Snap)'].update(button_color = ('white','gray'), disabled=True)
         window['Add Peak (No-Snap)'].update(button_color = ('white','gray'), disabled=True)
         ecg_plot()
+        ibi = ibi_plot(peaks)
         
         #Save Outputs
         ppt_name = file_name.rsplit('/',1)[1]
