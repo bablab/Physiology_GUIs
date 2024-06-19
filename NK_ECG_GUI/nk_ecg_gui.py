@@ -274,8 +274,8 @@ layout = [
 window = sg.Window('ECG Editor', layout, finalize=True, resizable = True)
 
 # 3. Create a plot of the ECG Data & IBI Plot Beneath
-fig = Figure(figsize=(20, 10), dpi=125)
-fig2 = Figure(figsize=(20, 5), dpi=125)
+fig = Figure(figsize=(12, 6), dpi=144)
+fig2 = Figure(figsize=(12, 6), dpi=144)
 fig.canvas.mpl_connect('pick_event', onpick1)
 ax = fig.add_subplot()
 ax2 = fig2.add_subplot()
