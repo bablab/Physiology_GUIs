@@ -133,7 +133,7 @@ class Toolbar(NavigationToolbar2Tk):
         super(Toolbar, self).__init__(*args, **kwargs)
 
 #Starting Screen
-layout_intro = [[sg.T("")], [sg.Text("Information about ECG Cleaning Application.")],
+layout_intro = [[sg.Text("")], [sg.Text("Information about ECG Cleaning Application.")],
           [sg.Text("Instructions:")],
           [sg.Text("1) Select .Acq Physio File or .Csv (single column, no header) Physio Timeseries")],
           [sg.Text("2) Select ECG Source Channel and/or Parameters")],
@@ -157,7 +157,7 @@ while True:
         break
         
 #Input Selection Screen
-layout_file = [[sg.T("")], [sg.Text("Choose a file: "), sg.Input(), sg.FileBrowse(key="-IN-")],
+layout_file = [[sg.Text("")], [sg.Text("Choose a file: "), sg.Input(), sg.FileBrowse(key="-IN-")],
                [sg.Button("Load"), sg.Button("Exit")]]
 
 #Build Window
@@ -180,7 +180,7 @@ if re.search(".acq", file_name):
     channels = tuple(physio_file.columns)
     
     ##Window to Select Channel & Notch Filter  
-    layout_settings = [[sg.T("")],[sg.Text("Select ECG Source:"), sg.Combo(channels, default_value='',key='-Source-')],
+    layout_settings = [[sg.Text("")],[sg.Text("Select ECG Source:"), sg.Combo(channels, default_value='',key='-Source-')],
              [sg.Text("Notch Filter:"),sg.Radio("60Hz", "notch", key='60', default=True),sg.Radio("50Hz", "notch", key='50')],
              [sg.Button("Plot Signal"), sg.Button("Exit")]]
     
@@ -209,7 +209,7 @@ elif re.search(".csv", file_name):
     physio_file = pd.read_csv(file_name, header=None)
     
     ##Window to Select Sampling Rate & Notch Filter  
-    layout_settings = [[sg.T("")],[sg.Text("Set Sampling Rate:"), sg.Input('', enable_events=True, key='-SRINPUT-', font=('Arial Bold', 20), expand_x=True, justification='left')],
+    layout_settings = [[sg.Text("")],[sg.Text("Set Sampling Rate:"), sg.Input('', enable_events=True, key='-SRINPUT-', font=('Arial Bold', 20), expand_x=True, justification='left')],
              [sg.Text("Notch Filter:"),sg.Radio("60Hz", "notch", key='60', default=True),sg.Radio("50Hz", "notch", key='50')],
              [sg.Button("Plot Signal"), sg.Button("Exit")]]
     
@@ -233,7 +233,7 @@ elif re.search(".csv", file_name):
 
 #If Invlaid File type (not ACQ or CSV)
 else:
-    layout_fileError = [[sg.T("")],
+    layout_fileError = [[sg.Text("")],
               [sg.Text("ERROR: Invalid File Type")],
               [sg.Text("Only acceptable file type: .acq or .csv")],
               [sg.Button('Exit')]]
@@ -258,9 +258,9 @@ peaks = peaks.tolist()
 
 # 2. create PySimpleGUI window, a fixed-size Frame with Canvas which expand in both x and y.
 layout = [
-    [sg.T('Edit Physio Data')],
+    [sg.Text('Edit Physio Data')],
     [sg.B('Re-Plot'), sg.B('Save'),sg.B('Exit')],
-    [sg.T('Controls:')],
+    [sg.Text('Controls:')],
     [sg.B('Add Peak (Snap)', button_color = ('white','black')), sg.B('Remove Peak', button_color = ('white','black')),
      sg.B('Add Peak (No-Snap)', button_color = ('white','black')), sg.Canvas(key='controls_cv')],
     [sg.Column(layout=[[sg.Canvas(key='fig_cv',size=(1500, 750),expand_x=True,expand_y=True)]],
