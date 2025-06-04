@@ -27,7 +27,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 #from mpl_point_clicker import clicker
 #import mpl_connect
 from matplotlib.figure import Figure
-import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 import os
 import re
 import pandas as pd
